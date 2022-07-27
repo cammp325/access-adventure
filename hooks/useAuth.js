@@ -46,7 +46,6 @@ export const AuthProvider = ({ children }) => {
         }
       }, [response]);
 
-      
 
     // const signInWithGoogle = async () => {
     //     Google.useAuthRequest(config).then( async (logInResult) => {
