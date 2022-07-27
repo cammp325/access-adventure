@@ -3,15 +3,18 @@ import { TailwindProvider } from "tailwindcss-react-native";
 import { NavigationContainer } from '@react-navigation/native';
 import StackNavigator from './StackNavigator';
 import { AuthProvider } from './hooks/useAuth';
+import {PaperProvider} from 'react-native-paper';
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <AuthProvider>
-        <TailwindProvider>
-          <StackNavigator />
-        </TailwindProvider>
-      </AuthProvider>
-    </NavigationContainer>
+    <PaperProvider>
+      <NavigationContainer>
+        <AuthProvider>
+          <TailwindProvider>
+            <StackNavigator />
+          </TailwindProvider>
+        </AuthProvider>
+      </NavigationContainer>
+    </PaperProvider>
   );
 }
