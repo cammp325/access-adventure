@@ -10,10 +10,15 @@ import {
   collection,
   where,
   getDocs,
-  updateDoc
+  updateDoc,
+  deleteDoc
 } from "firebase/firestore";
+import { NativeModules } from "react-native";
 import useAuth from "../hooks/useAuth";
 const db = getFirestore();
+
+
+
 
 const ProfileScreen = ({ navigation }) => {
   const { user } = useAuth();
@@ -58,6 +63,19 @@ const ProfileScreen = ({ navigation }) => {
         .finally(() => setIsFetching(false));
     }
   };
+
+  const onDelete = () => {
+    setIsFetching(true);
+    if (userDocRef.current) {
+      deleteDoc(doc(db, "users", userDocRef.current.id))
+        .then(() => {})
+        .catch((e) => console.error(e))
+        .finally(() => {
+            setIsFetching(false)
+            NativeModules.DevSettings.reload();
+        });
+    }
+  }
   return (
     <View style={{ alignItems: "center", paddingTop: 16 }}>
       <Avatar.Image
@@ -96,6 +114,16 @@ const ProfileScreen = ({ navigation }) => {
           onPress={onSubmit}
         >
           Save
+        </Button>
+        <Button
+          disabled={isFetching}
+          icon="trash-can"
+          mode="contained"
+          style={{ marginLeft: 8 }}
+          color="red"
+          onPress={onDelete}
+        >
+          Delete
         </Button>
       </View>
     </View>
