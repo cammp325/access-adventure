@@ -17,16 +17,14 @@ import { NativeModules } from "react-native";
 import useAuth from "../hooks/useAuth";
 const db = getFirestore();
 
-
-
-
 const ProfileScreen = ({ navigation }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
     lastName: "",
-    photoUrl: ""
+    photoUrl: "",
+    instagram: ""
   });
 
   const userDocRef = useRef();
@@ -43,7 +41,8 @@ const ProfileScreen = ({ navigation }) => {
             email: userData.email,
             firstName: userData.firstName,
             lastName: userData.lastName,
-            photoUrl: userData.photoUrl
+            photoUrl: userData.photoUrl,
+            instagram: userData.instagram
           })
         })
         .catch((e) => {
@@ -60,7 +59,9 @@ const ProfileScreen = ({ navigation }) => {
       updateDoc(doc(db, "users", userDocRef.current.id), formData)
         .then(() => {})
         .catch((e) => console.error(e))
-        .finally(() => setIsFetching(false));
+        .finally(() => {
+            setIsFetching(false)
+        });
     }
   };
 
@@ -106,6 +107,15 @@ const ProfileScreen = ({ navigation }) => {
           onChangeText={(text) => setFormData({ ...formData, email: text })}
         />
       </View>
+      <View style={{ padding: 16, flexDirection: "row" }}>
+        <TextInput
+          label="Instagram"
+          value={formData.instagram}
+          style={{ flex: 1 }}
+          onChangeText={(text) => setFormData({ ...formData, instagram: text })}
+        />
+      </View>
+      
       <View style={{ padding: 16, flexDirection: "row" }}>
         <Button
           disabled={isFetching}

@@ -57,7 +57,9 @@ export const AuthProvider = ({ children }) => {
             lastName: value.user.displayName.split(" ")[1],
             photoUrl: value.user.photoURL,
             uid: value.user.uid,
-          }).finally(() => {
+          })
+          .catch(console.error)
+          .finally(() => {
             isWriting = false;
           });
           setUser(value.user);
@@ -70,12 +72,13 @@ export const AuthProvider = ({ children }) => {
           where("uid", "==", value.user.uid)
         )
           .then((data) => {
-            let userDoc = []
+            let userDoc;
             data.forEach(doc => {
-              if( doc.udid === value.user.udid) {
+              if( doc.data().uid === value.user.uid) {
                 userDoc = doc
               }
             })
+
             if(!userDoc)
               writeUser();
             else {

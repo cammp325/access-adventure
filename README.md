@@ -10,7 +10,7 @@ This team project aims to build an outdoor app for adventure seekers and provide
 [x] The system will have a login page (single sign-on (SSO) will have extra points if implemented)—there should be a DB handling encrypted user data.
 
 
-[...] Users will be able to create and delete the profile and upload photos.
+[x] Users will be able to create and delete the profile and upload photos.
 
 [] The system will allow users to connect their profiles to Instagram and other social media.
 
