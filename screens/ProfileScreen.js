@@ -2,7 +2,7 @@ import React from 'react'
 import { View } from "react-native"
 import { Avatar, Button, TextInput } from 'react-native-paper';
 
-const Profile = ({navigation}) => { 
+const ProfileScreen = ({navigation}) => { 
     const [formData, setFormData] = React.useState({
         email: '',
         firstName: '',
@@ -10,7 +10,7 @@ const Profile = ({navigation}) => {
     });
     return (
         <View style={{alignItems: "center", paddingTop: 16}}>
-            <Avatar.Image size={100} source={require('../../../assets/adaptive-icon.png')} />
+            <Avatar.Image size={100} source={require('../assets/adaptive-icon.png')} />
             <View style={{ padding: 16, flexDirection: "row"}}>
                 <TextInput
                 label="First Name"
@@ -44,4 +44,4 @@ const Profile = ({navigation}) => {
         </View>
     )
 }
-export default Profile
+export default ProfileScreen

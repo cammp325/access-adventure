@@ -6,6 +6,8 @@ import * as Google from 'expo-auth-session/providers/google';
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import firebase from '../firebase'
+import { useNavigation } from '@react-navigation/native';
+
 // import * as Google from 'expo-google-app-auth';
 
 initializeApp({
@@ -22,6 +24,8 @@ WebBrowser.maybeCompleteAuthSession();
 const AuthContext = createContext({})
 
 export const AuthProvider = ({ children }) => {
+  const {navigate} = useNavigation();
+  const [user, setUser] = useState()
 
     const [request, response, promptAsync] = Google.useIdTokenAuthRequest(
         {
@@ -34,11 +38,11 @@ export const AuthProvider = ({ children }) => {
         if (response?.type === 'success') {
           const { id_token } = response.params;
           const auth = getAuth();
-          const provider = new GoogleAuthProvider();
-          console.log(provider);
-          const credential = provider.credential(id_token);
-          signInWithCredential(auth, credential);
-//if dev mode then else statement called -
+          const credential = GoogleAuthProvider.credential(id_token);
+          signInWithCredential(auth, credential).then((value) => {
+            setUser(value.user)
+            navigate('Home')
+          })
         }
       }, [response]);
 
@@ -69,7 +73,7 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider 
         value={{
-            user: null,
+            user,
             signInWithGoogle:() => promptAsync()
         }}
     >

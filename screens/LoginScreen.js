@@ -6,7 +6,6 @@ import { useNavigation } from '@react-navigation/native';
 const LoginScreen = () => {
 
     const { signInWithGoogle } = useAuth();
-    const navigation = useNavigation();
 
   return (
     <View>
