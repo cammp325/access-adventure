@@ -21,6 +21,7 @@ const ProfileScreen = ({ navigation }) => {
     email: "",
     firstName: "",
     lastName: "",
+    photoUrl: ""
   });
 
   const userDocRef = useRef();
@@ -37,6 +38,7 @@ const ProfileScreen = ({ navigation }) => {
             email: userData.email,
             firstName: userData.firstName,
             lastName: userData.lastName,
+            photoUrl: userData.photoUrl
           })
         })
         .catch((e) => {
@@ -50,22 +52,17 @@ const ProfileScreen = ({ navigation }) => {
   const onSubmit = () => {
     setIsFetching(true);
     if (userDocRef.current) {
-      if (formData.email) userDocRef.current.email = formData.email;
-      if (formData.firstName) userDocRef.current.firstName = formData.firstName;
-      if (formData.lastName) userDocRef.current.lastName = formData.lastName;
-   
       updateDoc(doc(db, "users", userDocRef.current.id), formData)
         .then(() => {})
         .catch((e) => console.error(e))
         .finally(() => setIsFetching(false));
     }
   };
-
   return (
     <View style={{ alignItems: "center", paddingTop: 16 }}>
       <Avatar.Image
         size={100}
-        source={require("../assets/adaptive-icon.png")}
+        source={{url: formData.photoUrl}}
       />
       <View style={{ padding: 16, flexDirection: "row" }}>
         <TextInput
