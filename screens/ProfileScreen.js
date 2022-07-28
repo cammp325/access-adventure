@@ -20,7 +20,7 @@ const ProfileScreen = () => {
     adventures: [],
     attitude: "",
     level: "",
-    preferences: ''
+    preferences: '',
   });
 
   const { user } = useAuth();
@@ -31,7 +31,7 @@ const ProfileScreen = () => {
 
   const onSubmit = () => {
     setIsFetching(true);
-    updateDoc(doc(db, "profiles", docRef.current.id), formData)
+    updateDoc(doc(db, "profiles", docRef.current.id), {...formData, uid: user.uid})
       .then(() => {})
       .catch((e) => console.error(e))
       .finally(() => {

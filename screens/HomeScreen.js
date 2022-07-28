@@ -34,6 +34,14 @@ const HomeScreen = () => {
       >
         Chat
       </Button>
+      <Button
+        icon="cards"
+        mode="contained"
+        style={{ marginTop: 12 }}
+        onPress={() => navigation.navigate("Swipe")}
+      >
+        Find Adventure Seekers
+      </Button>
     </View>
   );
 };
