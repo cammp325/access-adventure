@@ -12,9 +12,9 @@ This team project aims to build an outdoor app for adventure seekers and provide
 
 [x] Users will be able to create and delete the profile and upload photos.
 
-[] The system will allow users to connect their profiles to Instagram and other social media.
+[x] The system will allow users to connect their profiles to Instagram and other social media.
 
-[] The system will collect information about a user, including parameters related to the type
+[...] The system will collect information about a user, including parameters related to the type
 of adventure, skill level, preferences, and attitude. Examples of adventures include skiing,
 backpacking, travel, hiking, holidate, etc. 
 

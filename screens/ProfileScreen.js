@@ -1,6 +1,7 @@
-import React, { useEffect, useState, useRef } from "react";
-import { View, TouchableOpacity } from "react-native";
-import { Avatar, Button, TextInput } from "react-native-paper";
+import { useState, useEffect, useRef } from "react";
+import { View, ScrollView } from "react-native";
+import { Checkbox, Card, TextInput, Button } from "react-native-paper";
+import useAuth from "../hooks/useAuth";
 import {
   getFirestore,
   doc,
@@ -8,83 +9,48 @@ import {
   where,
   getDocs,
   updateDoc,
-  deleteDoc,
 } from "firebase/firestore";
-import { NativeModules } from "react-native";
-import useAuth from "../hooks/useAuth";
-import * as ImagePicker from "expo-image-picker";
-
-const getPictureBlob = (uri) => {
-  // https://github.com/expo/expo/issues/2402#issuecomment-443726662
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.onload = function () {
-      resolve(xhr.response);
-    };
-    xhr.onerror = function (e) {
-      console.log(e);
-      reject(new TypeError("Network request failed"));
-    };
-    xhr.responseType = "blob";
-    xhr.open("GET", uri, true);
-    xhr.send(null);
-  });
-};
 
 const db = getFirestore();
 
-import { getStorage, ref, getDownloadURL, uploadBytes } from "firebase/storage";
+const adventures = ["Skiing", "Backpacking", "Travel", "Hiking", "Holiday"];
 
-const storage = getStorage();
-
-const ProfileScreen = ({ navigation }) => {
-  const { user } = useAuth();
+const ProfileScreen = () => {
   const [formData, setFormData] = useState({
-    email: "",
-    firstName: "",
-    lastName: "",
-    photoUrl: "",
-    instagram: "",
+    adventures: [],
+    attitude: "",
+    level: "",
+    preferences: ''
   });
 
-  const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.5,
-    });
+  const { user } = useAuth();
 
-    if (!result.cancelled) {
-      const blob = await getPictureBlob(result.uri);
-      // binary data
-      const storageRef = ref(storage, "profile_photos/" + user.uid);
-      uploadBytes(storageRef, blob)
-        .then((snapshot) => {
-          getDownloadURL(snapshot.ref).then((downloadURL) => {
-            setFormData({ ...formData, photoUrl: downloadURL });
-          });
-        })
-        .catch((e) => console.error(e));
-    }
+  const [isFetching, setIsFetching] = useState(false);
+
+  const docRef = useRef();
+
+  const onSubmit = () => {
+    setIsFetching(true);
+    updateDoc(doc(db, "profiles", docRef.current.id), formData)
+      .then(() => {})
+      .catch((e) => console.error(e))
+      .finally(() => {
+        setIsFetching(false);
+      });
   };
 
-  const userDocRef = useRef();
-
   useEffect(() => {
-    if (user.uid && !userDocRef.current) {
-      getDocs(collection(db, "users"), where("uid", "==", user.uid))
+    if (user.uid && !docRef.current) {
+      getDocs(collection(db, "profiles"), where("uid", "==", user.uid))
         .then((data) => {
-          userDocRef.current = data.docs[0];
+          docRef.current = data.docs[0];
           const userData = data.docs[0].data();
 
           setFormData({
-            email: userData.email,
-            firstName: userData.firstName,
-            lastName: userData.lastName,
-            photoUrl: userData.photoUrl,
-            instagram: userData.instagram,
+            adventures: userData.adventures,
+            attitude: userData.attitude,
+            level: userData.level,
+            preferences: userData.preferences
           });
         })
         .catch((e) => {
@@ -93,95 +59,94 @@ const ProfileScreen = ({ navigation }) => {
     }
   }, [user.uid]);
 
-  const [isFetching, setIsFetching] = useState(false);
-
-  const onSubmit = () => {
-    setIsFetching(true);
-    if (userDocRef.current) {
-      updateDoc(doc(db, "users", userDocRef.current.id), formData)
-        .then(() => {})
-        .catch((e) => console.error(e))
-        .finally(() => {
-          setIsFetching(false);
-        });
-    }
-  };
-
-  const onDelete = () => {
-    setIsFetching(true);
-    if (userDocRef.current) {
-      deleteDoc(doc(db, "users", userDocRef.current.id))
-        .then(() => {})
-        .catch((e) => console.error(e))
-        .finally(() => {
-          setIsFetching(false);
-          NativeModules.DevSettings.reload();
-        });
-    }
-  };
   return (
-    <View style={{ alignItems: "center", paddingTop: 16 }}>
-      <TouchableOpacity
-        onPress={() => {
-          pickImage();
-        }}
-      >
-        <Avatar.Image size={100} source={{ url: formData.photoUrl }} />
-      </TouchableOpacity>
-      <View style={{ padding: 16, flexDirection: "row" }}>
-        <TextInput
-          label="First Name"
-          value={formData.firstName}
-          style={{ flex: 1 }}
-          onChangeText={(text) => setFormData({ ...formData, firstName: text })}
-        />
-      </View>
-      <View style={{ padding: 16, flexDirection: "row" }}>
-        <TextInput
-          label="Last Name"
-          value={formData.lastName}
-          style={{ flex: 1 }}
-          onChangeText={(text) => setFormData({ ...formData, lastName: text })}
-        />
-      </View>
-      <View style={{ padding: 16, flexDirection: "row" }}>
-        <TextInput
-          label="Email"
-          value={formData.email}
-          style={{ flex: 1 }}
-          onChangeText={(text) => setFormData({ ...formData, email: text })}
-        />
-      </View>
-      <View style={{ padding: 16, flexDirection: "row" }}>
-        <TextInput
-          label="Instagram"
-          value={formData.instagram}
-          style={{ flex: 1 }}
-          onChangeText={(text) => setFormData({ ...formData, instagram: text })}
-        />
-      </View>
+    <View style={{ padding: 16, flex: 1 }}>
+      <ScrollView>
+        <Card>
+          <Card.Title
+            title="Adventure"
+            subtitle="Select adventures that you love"
+          />
 
-      <View style={{ padding: 16, flexDirection: "row" }}>
-        <Button
-          disabled={isFetching}
-          icon="floppy"
-          mode="contained"
-          onPress={onSubmit}
-        >
-          Save
-        </Button>
-        <Button
-          disabled={isFetching}
-          icon="trash-can"
-          mode="contained"
-          style={{ marginLeft: 8 }}
-          color="red"
-          onPress={onDelete}
-        >
-          Delete
-        </Button>
-      </View>
+          {adventures.map((interest, index) => {
+            return (
+              <View key={index} style={{ flexDirection: "row" }}>
+                <Checkbox.Item
+                  position="leading"
+                  status={
+                    formData.adventures.includes(interest)
+                      ? "checked"
+                      : "unchecked"
+                  }
+                  onPress={() => {
+                    if (formData.adventures.includes(interest)) {
+                      setFormData({
+                        ...formData,
+                        adventures: formData.adventures.filter(
+                          (i) => i !== interest
+                        ),
+                      });
+                    } else {
+                      setFormData({
+                        ...formData,
+                        adventures: [...formData.adventures, interest],
+                      });
+                    }
+                  }}
+                  label={interest}
+                />
+              </View>
+            );
+          })}
+        </Card>
+        <View style={{ marginTop: 16 }}>
+          {/* skill level, preferences, and attitude */}
+          <Card>
+            <Card.Title
+              title="Skills"
+              subtitle="Provide adventure information"
+            />
+            <View style={{ padding: 16, flexDirection: "row" }}>
+              <TextInput
+                label="Skill Level"
+                value={formData.level || ""}
+                style={{ flex: 1 }}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, level: text })
+                }
+              />
+            </View>
+            <View style={{ padding: 16, flexDirection: "row" }}>
+              <TextInput
+                label="Preferences"
+                value={formData.preferences || ""}
+                style={{ flex: 1 }}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, preferences: text })
+                }
+              />
+            </View>
+
+            <View style={{ padding: 16, flexDirection: "row" }}>
+              <TextInput
+                label="Attitude"
+                value={formData.attitude || ""}
+                style={{ flex: 1 }}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, attitude: text })
+                }
+              />
+            </View>
+          </Card>
+          <View style={{ marginTop: 24, marginBottom: 16 }}>
+            <Button disabled={isFetching}  icon="floppy" mode="contained" onPress={onSubmit}>
+              Save
+            </Button>
+          </View>
+        </View>
+      </ScrollView>
     </View>
   );
 };
+
 export default ProfileScreen;
