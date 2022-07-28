@@ -18,14 +18,15 @@ This team project aims to build an outdoor app for adventure seekers and provide
 of adventure, skill level, preferences, and attitude. Examples of adventures include skiing,
 backpacking, travel, hiking, holidate, etc. 
 
-[] The system will have a matching engine/algorithm to effectively match users (through
+[x] The system will have a matching engine/algorithm to effectively match users (through
 swipe left and swipe right type of mechanism) with others that suit their adventure, skills,
-and behaviors within their selected mile range.
+and ***behaviors within their selected mile range***.
 
-[] The system will have an in-app messaging to enable users to coordinate an outing or
-simply chat with a match (voice note, audio, and video calls options will have extra
-points if implemented).
+[x] The system will have an in-app messaging to enable users to coordinate an outing or
+simply chat with a match ***(voice note, audio, and video calls options will have extra
+points if implemented)***.
 
 ## Notes
 
 ## TODO
+[] Add selected mile range feature that wasnt described in the profile / account / algo section

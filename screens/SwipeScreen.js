@@ -68,7 +68,7 @@ const SwipeScreen = ({navigation}) => {
         key={refreshCount}
         onTapCard={(cardIndex) => {
             navigation.navigate("Chat", {
-                userData: userData[cardIndex].uid,
+                uid: userData[cardIndex].uid,
             });
         }}
         cards={userData}

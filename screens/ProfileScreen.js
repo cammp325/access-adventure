@@ -21,6 +21,7 @@ const ProfileScreen = () => {
     attitude: "",
     level: "",
     preferences: '',
+    miles: ''
   });
 
   const { user } = useAuth();
@@ -50,7 +51,8 @@ const ProfileScreen = () => {
             adventures: userData.adventures,
             attitude: userData.attitude,
             level: userData.level,
-            preferences: userData.preferences
+            preferences: userData.preferences,
+            miles: userData.miles
           });
         })
         .catch((e) => {
@@ -100,7 +102,6 @@ const ProfileScreen = () => {
           })}
         </Card>
         <View style={{ marginTop: 16 }}>
-          {/* skill level, preferences, and attitude */}
           <Card>
             <Card.Title
               title="Skills"
@@ -123,6 +124,18 @@ const ProfileScreen = () => {
                 style={{ flex: 1 }}
                 onChangeText={(text) =>
                   setFormData({ ...formData, preferences: text })
+                }
+              />
+            </View>
+
+            <View style={{ padding: 16, flexDirection: "row" }}>
+              <TextInput
+                label="Meeting Mile Range"
+                keyboardType="numeric"
+                value={formData.miles || ""}
+                style={{ flex: 1 }}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, miles: text })
                 }
               />
             </View>
