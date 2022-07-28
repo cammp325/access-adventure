@@ -51,17 +51,20 @@ export const AuthProvider = ({ children }) => {
       const credential = GoogleAuthProvider.credential(id_token);
       signInWithCredential(auth, credential).then((value) => {
         const writeUser = () => {
-          addDoc(collection(db, "users"), {
-            email: value.user.email,
-            firstName: value.user.displayName.split(" ")[0],
-            lastName: value.user.displayName.split(" ")[1],
-            photoUrl: value.user.photoURL,
-            uid: value.user.uid,
+          addDoc(collection(db, "profiles"), { uid: value.user.uid}).then(() => {
+            addDoc(collection(db, "users"), {
+              email: value.user.email,
+              firstName: value.user.displayName.split(" ")[0] || '',
+              lastName: value.user.displayName.split(" ")[1] || '',
+              photoUrl: value.user.photoURL,
+              uid: value.user.uid,
+            })
+            .catch(console.error)
+            .finally(() => {
+              isWriting = false;
+            });
           })
-          .catch(console.error)
-          .finally(() => {
-            isWriting = false;
-          });
+          
           setUser(value.user);
           navigate("Home");
         };
@@ -93,6 +96,7 @@ export const AuthProvider = ({ children }) => {
       });
     }
   }, [response]);
+
 
   // const signInWithGoogle = async () => {
   //     Google.useAuthRequest(config).then( async (logInResult) => {

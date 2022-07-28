@@ -44,8 +44,8 @@ const ProfileScreen = () => {
     if (user.uid && !docRef.current) {
       getDocs(collection(db, "profiles"), where("uid", "==", user.uid))
         .then((data) => {
-          docRef.current = data.docs[0];
-          const userData = data.docs[0].data();
+          docRef.current =  data.docs.find((doc) => doc.data().uid === user.uid);
+          const userData =   docRef.current.data()
 
           setFormData({
             adventures: userData.adventures,
@@ -76,22 +76,22 @@ const ProfileScreen = () => {
                 <Checkbox.Item
                   position="leading"
                   status={
-                    formData.adventures.includes(interest)
+                    formData.adventures?.includes(interest)
                       ? "checked"
                       : "unchecked"
                   }
                   onPress={() => {
-                    if (formData.adventures.includes(interest)) {
+                    if (formData.adventures?.includes(interest)) {
                       setFormData({
                         ...formData,
-                        adventures: formData.adventures.filter(
+                        adventures: formData.adventures?.filter(
                           (i) => i !== interest
                         ),
                       });
                     } else {
                       setFormData({
                         ...formData,
-                        adventures: [...formData.adventures, interest],
+                        adventures: [...(formData.adventures || []), interest],
                       });
                     }
                   }}

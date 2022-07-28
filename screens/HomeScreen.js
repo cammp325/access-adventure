@@ -26,14 +26,7 @@ const HomeScreen = () => {
       >
         My Profile
       </Button>
-      <Button
-        icon="chat"
-        mode="contained"
-        style={{ marginTop: 12 }}
-        onPress={() => navigation.navigate("Chat")}
-      >
-        Chat
-      </Button>
+     
       <Button
         icon="cards"
         mode="contained"

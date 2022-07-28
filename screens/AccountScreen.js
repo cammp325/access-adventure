@@ -74,10 +74,11 @@ const ProfileScreen = ({ navigation }) => {
 
   useEffect(() => {
     if (user.uid && !userDocRef.current) {
+      console.log(user.uid)
       getDocs(collection(db, "users"), where("uid", "==", user.uid))
         .then((data) => {
-          userDocRef.current = data.docs[0];
-          const userData = data.docs[0].data();
+          userDocRef.current = data.docs.find((doc) => doc.data().uid === user.uid);
+          const userData = userDocRef.current.data();
 
           setFormData({
             email: userData.email,

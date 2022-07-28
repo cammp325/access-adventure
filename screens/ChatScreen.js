@@ -30,29 +30,30 @@ const ChatScreen = (props) => {
     setIsFetching(true);
     //todo get messages from db call
     if (receiverUid && senderUid && !isFetching) {
-      console.log("fetching messages");
+
       getDocs(
         collection(db, "messages"),
         where("receiverUid", "==", receiverUid),
         where("senderUid", "==", senderUid)
       ).then(async (data) => {
-        console.log("got docs");
+
         setIsFetching(false);
         setMessages(
           data.docs
             .map((doc) => doc.data())
+            .filter((d) =>( d.senderUid === senderUid && d.receiverUid === receiverUid)|| ( d.senderUid === receiverUid && d.receiverUid === senderUid))
             .sort((a, b) => a.dateSent - b.dateSent)
         );
         const newUsers = { ...users };
         newUsers.sender = (
           await getDocs(collection(db, "users"), where("uid", "==", senderUid))
-        ).docs[0].data();
+        ).docs.find(doc => doc.data().uid === senderUid).data();
         newUsers.receiver = (
           await getDocs(
             collection(db, "users"),
             where("uid", "==", receiverUid)
           )
-        ).docs[0].data();
+        ).docs.find(doc => doc.data().uid === receiverUid).data();
         setUsers(newUsers);
       });
     }
@@ -60,6 +61,8 @@ const ChatScreen = (props) => {
   useEffect(() => {
     fetchMessages();
   }, [receiverUid, senderUid]);
+
+  console.log(users)
 
   const onSubmit = () => {
     if (message.length > 0) {
@@ -81,6 +84,8 @@ const ChatScreen = (props) => {
     if (messages) scrollRef.current?.scrollToEnd();
   }, [messages]);
 
+  console.log(senderUid, receiverUid)
+
   return (
     <View style={{ flex: 1 }}>
       <ScrollView ref={scrollRef}>
@@ -91,7 +96,7 @@ const ChatScreen = (props) => {
                 <View style={{ flexDirection: message.senderUid === senderUid ? "row" : "row-reverse" }}>
                   <Avatar.Image
                     size={40}
-                    source={{ url: users.sender.photoUrl }}
+                    source={{ url:  message.senderUid === senderUid ? users.sender.photoUrl :  users.receiver.photoUrl }}
                   />
                   <View style={{[`margin${message.senderUid === senderUid ? 'Left' : 'Right'}`]: 16, flex: 1}}>
                     <Text style={{textAlign: message.senderUid === senderUid ? 'left' : 'right'}}>{message.message}</Text>
