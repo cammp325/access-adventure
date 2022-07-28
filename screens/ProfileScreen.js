@@ -1,21 +1,41 @@
 import React, { useEffect, useState, useRef } from "react";
-import { View } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { Avatar, Button, TextInput } from "react-native-paper";
 import {
   getFirestore,
-  addDoc,
-  setDoc,
-  getDoc,
   doc,
   collection,
   where,
   getDocs,
   updateDoc,
-  deleteDoc
+  deleteDoc,
 } from "firebase/firestore";
 import { NativeModules } from "react-native";
 import useAuth from "../hooks/useAuth";
+import * as ImagePicker from "expo-image-picker";
+
+const getPictureBlob = (uri) => {
+  // https://github.com/expo/expo/issues/2402#issuecomment-443726662
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = function () {
+      resolve(xhr.response);
+    };
+    xhr.onerror = function (e) {
+      console.log(e);
+      reject(new TypeError("Network request failed"));
+    };
+    xhr.responseType = "blob";
+    xhr.open("GET", uri, true);
+    xhr.send(null);
+  });
+};
+
 const db = getFirestore();
+
+import { getStorage, ref, getDownloadURL, uploadBytes } from "firebase/storage";
+
+const storage = getStorage();
 
 const ProfileScreen = ({ navigation }) => {
   const { user } = useAuth();
@@ -24,8 +44,31 @@ const ProfileScreen = ({ navigation }) => {
     firstName: "",
     lastName: "",
     photoUrl: "",
-    instagram: ""
+    instagram: "",
   });
+
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.5,
+    });
+
+    if (!result.cancelled) {
+      const blob = await getPictureBlob(result.uri);
+      // binary data
+      const storageRef = ref(storage, "profile_photos/" + user.uid);
+      uploadBytes(storageRef, blob)
+        .then((snapshot) => {
+          getDownloadURL(snapshot.ref).then((downloadURL) => {
+            setFormData({ ...formData, photoUrl: downloadURL });
+          });
+        })
+        .catch((e) => console.error(e));
+    }
+  };
 
   const userDocRef = useRef();
 
@@ -33,17 +76,16 @@ const ProfileScreen = ({ navigation }) => {
     if (user.uid && !userDocRef.current) {
       getDocs(collection(db, "users"), where("uid", "==", user.uid))
         .then((data) => {
-         
           userDocRef.current = data.docs[0];
-          const userData = data.docs[0].data()
-    
+          const userData = data.docs[0].data();
+
           setFormData({
             email: userData.email,
             firstName: userData.firstName,
             lastName: userData.lastName,
             photoUrl: userData.photoUrl,
-            instagram: userData.instagram
-          })
+            instagram: userData.instagram,
+          });
         })
         .catch((e) => {
           console.error(e);
@@ -60,7 +102,7 @@ const ProfileScreen = ({ navigation }) => {
         .then(() => {})
         .catch((e) => console.error(e))
         .finally(() => {
-            setIsFetching(false)
+          setIsFetching(false);
         });
     }
   };
@@ -72,17 +114,20 @@ const ProfileScreen = ({ navigation }) => {
         .then(() => {})
         .catch((e) => console.error(e))
         .finally(() => {
-            setIsFetching(false)
-            NativeModules.DevSettings.reload();
+          setIsFetching(false);
+          NativeModules.DevSettings.reload();
         });
     }
-  }
+  };
   return (
     <View style={{ alignItems: "center", paddingTop: 16 }}>
-      <Avatar.Image
-        size={100}
-        source={{url: formData.photoUrl}}
-      />
+      <TouchableOpacity
+        onPress={() => {
+          pickImage();
+        }}
+      >
+        <Avatar.Image size={100} source={{ url: formData.photoUrl }} />
+      </TouchableOpacity>
       <View style={{ padding: 16, flexDirection: "row" }}>
         <TextInput
           label="First Name"
@@ -115,7 +160,7 @@ const ProfileScreen = ({ navigation }) => {
           onChangeText={(text) => setFormData({ ...formData, instagram: text })}
         />
       </View>
-      
+
       <View style={{ padding: 16, flexDirection: "row" }}>
         <Button
           disabled={isFetching}
