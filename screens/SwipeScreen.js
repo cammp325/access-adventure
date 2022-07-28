@@ -13,6 +13,21 @@ import {
 } from "firebase/firestore";
 
 const db = getFirestore();
+const RETURN_ALL_USERS=false; //disable this if you need to debug something with the results
+
+const filterUsersByTraits = (users, traits) => {
+  if(RETURN_ALL_USERS) return users
+  let relaventUsers = [];
+  users.forEach(user => {
+    if(user.miles <= traits.miles) {
+        if(user.adventures?.some(adventure => traits.adventures.includes(adventure))) {
+          relaventUsers.push(user);
+        }
+    }
+  })
+
+  return relaventUsers.length > 0 ? relaventUsers : users;
+}
 
 const SwipeScreen = ({navigation}) => {
   const { user } = useAuth();
@@ -26,32 +41,30 @@ const SwipeScreen = ({navigation}) => {
   useEffect(() => {
     setIsFetching(true);
     if (user.uid && !docRef.current) {
-      getDocs(collection(db, "users"), where("uid", "!=", user.uid))
+      getDocs(collection(db, "users"))
         .then(async (data) => {
-          docRef.current = data.docs;
+          docRef.current = data.docs.filter(doc => doc.data().uid !== user.uid);
           let newUserData = [];
           let profileData = [];
 
           profileDocRef.current = (
             await getDocs(
-              collection(db, "profiles"),
-              where("uid", "!=", user.uid)
+              collection(db, "profiles")
             )
-          ).docs;
-
+          )
+              
           profileDocRef.current.forEach((doc) => {
-            profileData.push({ ...doc.data() });
+            if(doc.data().uid !== user.uid) 
+              profileData.push({ ...doc.data() });
           });
 
-          console.log(profileData);
-          data.docs.forEach((doc) => {
+          docRef.current.forEach((doc) => {
             newUserData.push({
               ...doc.data(),
               ...profileData.find((profile) => profile.uid === doc.data().uid),
             });
           });
-
-          setUserData(newUserData);
+          setUserData(filterUsersByTraits(newUserData, profileDocRef.current.docs.find(doc => doc.data().uid === user.uid).data()));
         })
         .catch((e) => {
           console.error(e);
@@ -62,8 +75,9 @@ const SwipeScreen = ({navigation}) => {
     }
   }, [user.uid, refreshCount]);
 
+
   return (
-    <View style={{ flex: 1 }}>
+    userData && userData.length > 1 && <View style={{ flex: 1 }}>
       <Swiper
         key={refreshCount}
         onTapCard={(cardIndex) => {
@@ -135,10 +149,10 @@ const SwipeScreen = ({navigation}) => {
           );
         }}
         onSwiped={(cardIndex) => {
-          console.log(cardIndex);
+     
         }}
         onSwipedAll={() => {
-          console.log("onSwipedAll");
+   
         }}
         cardIndex={0}
         backgroundColor={"transparent"}
